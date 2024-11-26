@@ -127,12 +127,35 @@ function get_all_products(){
 			$contar++;
 			
 			
-			if($contar == 20 ){
+			if($contar  >= 3 ){
 				break;
 			}
-			
-			
 
+			// Crear SERVICIOS (Post) ----------------------------------------------------
+
+				$nueva_publicacion = array(
+					
+					'post_title'   => 'Insert Migben SERVICIO DELIA BARRAZA - ' . $estudio['studie'],
+					'post_content' => 'Contenido Post Indicaciones - ' . $estudio['indications'][0]['indication'],
+					'post_status'   => 'publish',
+					'post_type'     => 'rutinas',
+				);
+	
+				// Asignar categoría (si existe en tu instalación de WordPress)
+				/*
+				if (isset($publicacion['category'])) {
+					$categoria = get_term_by('name', $publicaciones['category'], 'category');
+					if ($categoria) {
+						$nueva_publicacion['post_category'] = array($categoria->term_id);
+					}
+				}
+				*/
+				
+	
+				wp_insert_post($nueva_publicacion);
+				
+			// -------------------------------------------------------------------------------
+	
 
 		}
 		

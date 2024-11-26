@@ -98,81 +98,52 @@
 	(function($){
 		$(document).ready(function(){
 
-	
-		// Marca el inicio de la consulta
-		const inicio = new Date();
-		console.log('Inicio de la consulta:', inicio.toLocaleString());
+			function LeerApi() {
+
+				$("#load_products_data").empty();
+
+				// Marca el inicio de la consulta
+				const inicio = new Date();
+				console.log('Inicio de la consulta:', inicio.toLocaleString());
 
 
-		$.get("<?=admin_url('admin-post.php?action=get_all_products')?>", function(response){
-			
+				$.get("<?=admin_url('admin-post.php?action=get_all_products')?>", function(response){
 
-		// Marca el fin de la consulta
-		const fin = new Date();
-		console.log('Fin de la consulta:', fin.toLocaleString());
 
-		// Calcula la duración en segundos
-		const duracion = (fin - inicio) / 1000;
-		console.log('Duración de la consulta:', duracion.toFixed(2), 'segundos');
+				// Marca el fin de la consulta
+				const fin = new Date();
+				console.log('Fin de la consulta:', fin.toLocaleString());
 
-			
-			
-		let data = JSON.parse(response);
-			
-			/*
+				// Calcula la duración en segundos
+				const duracion = (fin - inicio) / 1000;
+				console.log('Duración de la consulta:', duracion.toFixed(2), 'segundos');
 
-			$("#load_products_data").empty();
-			$.each(data.result, function(v,e){
-				$("#load_products_data").append("<tr><td>"+e.sku+"</td><td>"+e.tipoproducto+"</td><td>"+e.price+"</td><td>"+e.inventory+"</td><td>"+e.price_tienda+"</td><td>"+e.inventory_tienda+"</td><td>"+e.action+"</td></tr>");
+				let data = JSON.parse(response);
 
-			});
-			
-			$("#resument_insert").text(data.inserts);
-			$("#resument_update").text(data.updates);
-			
-			*/
-			
-			
-			$("#load_products_data").empty();
-			$.each(data.result, function(v,e){
+				$.each(data.result, function(v,e){
 				$("#load_products_data").append("<tr><td>"+e.code+"</td><td>"+e.studie+"</td><td>"+e.indications+"</td><td>"+e.price+"</td></tr>");
 
-			});
-			
-			$("#resument_insert").text(data.inserts);
-			$("#resument_update").text(data.updates);
-			
+				});
 
-			
-		});
 
+
+				});	
+
+			}
 
 			$("#iou_button").click(function(){
 
 				console.log('click en BOTON');
 
 				$("#iou_button").attr("disabled",true);
-				$("#iou_button").text("Actualizando Productos...");
-
-
-				$.get("<?=admin_url('admin-post.php?action=update_products')?>", function(response){
-					console.log('inicio actualizando productos');
-					let data2 = JSON.parse(response);
-					console.log('abajo data');
-					console.log(data2);
-
-					alert(data2.updates + " Productos Actualizados !");
-
-					location.reload();
-					
-					$("#iou_button").text("Actualizar");
-					$("#iou_button").attr("disabled",false);
-
-
-
-				});
+				$("#iou_button").text("Leyendo API...");
+				LeerApi();
+				$("#iou_button").attr("disabled", false);
 
 			});
+
+
 		});
+
 	})(jQuery);
 </script>
