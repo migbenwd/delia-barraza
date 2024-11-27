@@ -107,13 +107,14 @@ function get_all_products(){
 
 	$estudios = $datos['data']['studies'];
 
-
+		/*
 	
-		// Iterar sobre cada estudio y mostrar el código
 		foreach ($estudios as $estudio) {
 
+			if($contar == 3 ){
+				break;
+			}
 
-			// $result[] = ['code' => $estudio['code']];
 			
 			$result[$index]['code'] = $estudio['code'];
 			$result[$index]['studie'] = $estudio['studie'];
@@ -127,37 +128,112 @@ function get_all_products(){
 			$contar++;
 			
 			
-			if($contar  >= 3 ){
-				break;
-			}
 
 			// Crear SERVICIOS (Post) ----------------------------------------------------
 
-				$nueva_publicacion = array(
-					
-					'post_title'   => 'Insert Migben SERVICIO DELIA BARRAZA - ' . $estudio['studie'],
-					'post_content' => 'Contenido Post Indicaciones - ' . $estudio['indications'][0]['indication'],
-					'post_status'   => 'publish',
-					'post_type'     => 'rutinas',
-				);
-	
-				// Asignar categoría (si existe en tu instalación de WordPress)
-				/*
-				if (isset($publicacion['category'])) {
-					$categoria = get_term_by('name', $publicaciones['category'], 'category');
-					if ($categoria) {
-						$nueva_publicacion['post_category'] = array($categoria->term_id);
-					}
-				}
-				*/
+			// Obtener la fecha y hora actual en un formato legible
+			$fecha_hora = date('Y-m-d H:i:s');
+
+			$nueva_publicacion = array(
 				
-	
-				wp_insert_post($nueva_publicacion);
+				'post_title'   => 'Insert Migben SERVICIO DELIA BARRAZA - ' . $estudio['studie'] . '- FECHA - '. $fecha_hora,
+				'post_content' => 'Contenido Post Indicaciones - ' . $estudio['indications'][0]['indication'],
+				'post_status'   => 'publish',
+				'post_type'     => 'rutinas',
+			);
+
+			$post_id = wp_insert_post($nueva_publicacion);
+		   
+			update_post_meta($post_id, 'cod_servicio_deliabarraza', $estudio['code']);
 				
 			// -------------------------------------------------------------------------------
 	
 
 		}
+
+		*/
+
+
+	foreach ($estudios as $estudio) {
+
+		// Obtener la fecha y hora actual en un formato legible
+		$fecha_hora = date('Y-m-d H:i:s');
+
+		
+			if($contar == 7 ){
+				break;
+			}
+
+
+
+			$result[$index]['code'] = $estudio['code'];
+			$result[$index]['studie'] = $estudio['studie'];
+			$result[$index]['price'] = $estudio['price'];
+			$result[$index]['indications'] = $estudio['indications'][0]['indication'];
+					
+
+			$updates++;
+			$index++;
+			
+
+
+
+			// Crear o actualizar el post
+			$args = array(
+				'meta_query' => array(
+					array(
+						'key'     => 'cod_servicio_deliabarraza',
+						'value'   => $estudio['code'],
+						'compare' => '='
+					)
+				),
+				'post_type' => 'rutinas',
+				'posts_per_page' => 1
+			);
+
+			$posts = get_posts($args);
+
+			if ($posts) {
+				
+				// Si se encontró el post, actualizarlo
+				$post_id = $posts[0]->ID;
+				$post_args = array(
+					'ID'           => $post_id,
+					// Aquí agregarías los campos a actualizar, por ejemplo:
+					'post_title'   => 'Update título -' . $estudio['studie']. ' - ' . $fecha_hora ,
+					'post_content' => 'Update contenido ' . $estudio['indications'][0]['indication'] . ' - ' . $fecha_hora,
+				);
+				wp_update_post($post_args);
+			
+			} else {
+				// Si no se encontró, crear un nuevo post
+
+				
+	
+				// Crear SERVICIOS (Post) ----------------------------------------------------
+	
+				// Obtener la fecha y hora actual en un formato legible
+				$fecha_hora = date('Y-m-d H:i:s');
+	
+				$nueva_publicacion = array(
+					
+					'post_title'   => 'Insert Migben SERVICIO DELIA BARRAZA - ' . $estudio['studie'] . '- FECHA - '. $fecha_hora,
+					'post_content' => 'Insert Contenido Indicaciones - ' . $estudio['indications'][0]['indication'],
+					'post_status'   => 'publish',
+					'post_type'     => 'rutinas',
+				);
+	
+				$post_id = wp_insert_post($nueva_publicacion);
+			   
+				update_post_meta($post_id, 'cod_servicio_deliabarraza', $estudio['code']);
+					
+				// -------------------------------------------------------------------------------
+			}
+
+			$contar++;
+
+		}
+
 		
 		$data['result'] = $result;
 		
