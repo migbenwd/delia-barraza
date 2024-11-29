@@ -65,9 +65,9 @@
 <h2>Url CronJob</h2>
 <hr />
 <div class="cron-url">
-	<span class="coderr b"><i> php -q <?php echo WPGRP_DIR. "cron.php"; ?></i></span><br />
+	<span class="coderr b"><i> php -q <?php echo WPDELIABAR_DIR. "cron.php"; ?></i></span><br />
     <br>
-    <?php _e('or URL:', ''); ?> &nbsp;&nbsp;&nbsp;<span class="coderr b"><i><?php echo WPGRP_URL. "cron.php"; ?></i></span>
+    <?php _e('or URL:', ''); ?> &nbsp;&nbsp;&nbsp;<span class="coderr b"><i><?php echo WPDELIABAR_URL. "cron.php"; ?></i></span>
     <br />
     <br>
 </div>
