@@ -7,20 +7,43 @@
 		existeCiudadSeleccionada();
 		comprobarCarpeta();
 		
+		 var CityIdSelex = 0;
+		
+		const ciudadSeleccionada = document.getElementById('ciudad-seleccionada-spam');
+		ciudadSeleccionada.addEventListener('click', () => {
+			
+			MostrarModal();
+	
+		});
+		
+		
 		function existeCiudadSeleccionada() {
 		  // Obtenemos el valor del localStorage con la clave "city_selected_id"
 		  const ciudadSeleccionada = localStorage.getItem('city_selected_id');
-	
+			
+		  // Obtenemos el valor del localStorage con la clave "city_selected_name"
+		  const ciudadSeleccionadaTexto = localStorage.getItem('city_selected_name');
+			
 		  // Verificamos si el valor obtenido es null (no existe) o una cadena vacía
 		  if (ciudadSeleccionada === null || ciudadSeleccionada === '') {
 			console.log('No existe una ciudad seleccionada en el localStorage.');
 			
 			 // Mostramos el MODAL - POP UP  
 			 MostrarModal();
+			 
 			
 			return false;
 		  } else {
 			console.log('Existe una ciudad seleccionada:', ciudadSeleccionada);
+			
+			  
+				  
+			  // Mostrar el texto de la ciudad en el span con id "ciudad-seleccionada-spam"
+			  const ciudadSpan1 = document.getElementById('ciudad-seleccionada-spam');
+			  if (ciudadSpan1) {
+				  ciudadSpan1.textContent = ciudadSeleccionadaTexto;  // Asignamos el texto al span
+			  }			  
+			  
 			return true;
 		  }
 		}
@@ -44,6 +67,12 @@
 		
 		
 		function MostrarModal(){
+		/*	
+		localStorage.removeItem('city_selected_id');		
+		localStorage.removeItem('city_selected_name');		
+		localStorage.removeItem('servicios_city');
+		*/
+			
 		$.ajax({
 			url: ajaxParams.ajaxUrl,  // El URL de WordPress, usualmente 'wp-admin/admin-ajax.php'
 			type: 'POST',
@@ -53,6 +82,8 @@
 			success: function(response) {
 			$('body').append(response);	
 			showModal();
+			colocarEventClicksEnModal();
+		
 			},
 			error: function(error) {
 				console.log('Dió Error: ');
@@ -61,46 +92,88 @@
 		});
 		}
 		
-		function showModal(){
-			console.log('entro en showModal');
-			const modal = document.getElementById('modal-ciudades');
-			modal.classList.add('show');
-			
+		
+		
+		// --------------------------------------------- CLICK EN DIV CON ID DE CIUDAD
+		// 
+		
+		function colocarEventClicksEnModal(){
 	
-			// Seleccionamos el div con el ID "modal-ciudades"
-			const modalCiudades = document.getElementById('modal-ciudades');
+			const modalCiudadesXX = document.querySelectorAll('.modal-ciudades');
+			  const cantidadModales = modalCiudadesXX.length;
+			  // Mostramos el resultado en la consola (puedes modificarlo para mostrar el resultado donde quieras)
+			  console.log('Hay', cantidadModales, 'modales de ciudades en la página.');
+			
+			 const modalCiudades = document.getElementById('modal-ciudades');
 	
 			// Agregamos un event listener para detectar clics dentro del div
+			
 			modalCiudades.addEventListener('click', (event) => {
+				
 			  // Verificamos si el elemento en el que se hizo clic tiene el atributo data-ciudad-id
+			  
 			  if (event.target.hasAttribute('data-ciudad-id')) {
+				  
+			   // Extraemos el texto del div al que se hizo clic
+				const ciudadTexto = event.target.textContent || event.target.innerText;
+				console.log('El texto de la ciudad es:', ciudadTexto);
+				  
 				// Obtenemos el valor del atributo y lo mostramos en consola (puedes reemplazar esto con cualquier otra acción)
 				const ciudadId = event.target.dataset.ciudadId;
 				console.log('El ID de la ciudad es:', ciudadId);
 				  
+				CityIdSelex = ciudadId;  
+				  
 				localStorage.setItem('city_selected_id', ciudadId);
-	
+				 
+				console.log('Se procede a crear LocalStorage de Nombre de Ciudad');
+				 
+				localStorage.setItem('city_selected_name', ciudadTexto);
+				  
+				  
+				// Mostrar el texto de la ciudad en el span con id "ciudad-seleccionada-spam"
+				const ciudadSpan = document.getElementById('ciudad-seleccionada-spam');
+				if (ciudadSpan) {
+				  ciudadSpan.textContent = ciudadTexto;  // Asignamos el texto al span
+				}			  
+				
+				const modal = document.getElementById("modal-ciudades");
 				modal.classList.remove('show'); // Ocultar el modal
 				modal.style.transition = 'transform 0.5s ease-in-out';
 				modal.style.transform = 'translateY(-100%)';
-				  
+				
+				
 				setTimeout(() => {
 					  modal.style.display = 'none';
 				  }, 800); // 5000 milisegundos = 5 segundos
+				
+				modal.remove();
+				 console.log("Elemento 'modal-ciudades' eliminado correctamente.");  
+				  
+				  
 				var CiudadSelectId =  localStorage.getItem('city_selected_id');
-	
-				get_servicios_por_ciudad(CiudadSelectId);			  
+				  
+				get_servicios_por_ciudad(CiudadSelectId);
+				
+				//reestablecerPrecios(); --- aqui no funciona  
 	
 			  }
+				
 			});
+	
 			
-			
+		}
+		
+		
+		
+		function showModal(){
+			console.log('entro en showModal');
+			const modal = document.getElementById('modal-ciudades');
+			modal.classList.add('show');
 		}
 	
 		
 		let animacionActiva = false; // Bandera para controlar la animación	
-		
-		// getServiciosTijuana();
 		
 		function get_servicios_por_ciudad($cityId){
 		
@@ -125,17 +198,11 @@
 			console.log('respuesta desde get_servicios_por_ciudad en dataServicio', dataServicio);	
 	
 			// Guardar el array en local storage
-			localStorage.setItem('servicios_city', JSON.stringify(dataServicio.result));
-			console.log('Datos guardados en local storage');
-	
-			// Recuperar y parsear los datos del local storage
-					
-			const datosGuardados = JSON.parse(localStorage.getItem('servicios_city'));					
-			const primerEstudio = datosGuardados[0].studie;
-			// console.log('Primer campo de studie:', primerEstudio);			
 			
-			// reestablecerPrecios();
-	
+			localStorage.removeItem('servicios_city');
+			localStorage.setItem('servicios_city', JSON.stringify(dataServicio.result));
+			console.log('Datos guardados en local storage');			
+			
 			// desactivarAnimacion();	
 				
 			const fin = new Date();
@@ -143,6 +210,9 @@
 	
 			const duracion = (fin - inicio) / 1000;
 			console.log('Duración de la consulta:', duracion.toFixed(2), 'segundos');
+			
+			// Reestablece Precios JUSTAMENTE AL GINALIZAR EL LLENADO DEL ARRAY servicios_city
+			reestablecerPrecios();	
 				
 			},
 			error: function(error) {
@@ -155,24 +225,37 @@
 		}
 		
 		
+		var costoServicio = 0;
 		
 		function encontrarPrecioPorCodigo(codigo) {
 			
-		  // console.log('Entra en encontrarPrecioPorCodigo');
-	
 		  // Obtener el array de servicios desde el localStorage
 		  const servicios = JSON.parse(localStorage.getItem('servicios_city'));
 	
-		  // Buscar el servicio con el código dado
-		  const servicioEncontrado = servicios.find(servicio => servicio.code === codigo);
+		  // console.log('Tamaño de array servicios, luego de entrar en encontrarPrecioPorCodigo');
+		  // console.log(servicios.length);	
+		  
+			  if (servicios !== null)
+			  {  
+					 // Buscar el servicio con el código dado
+					 const servicioEncontrado = servicios.find(servicio => servicio.code === codigo);
+					
+					  // Si se encontró el servicio, retornar el precio, si no, retornar un mensaje o valor por defecto
+					
+				  
+					return servicioEncontrado ? servicioEncontrado.price : 'Servicio Sin Precio En esta Ciudad';	  
 	
-		  // Si se encontró el servicio, retornar el precio, si no, retornar un mensaje o valor por defecto
-		  return servicioEncontrado ? servicioEncontrado.price : 'Servicio Sin Precio En esta Ciudad';
+			  }
+				
+			  
+	
 		 }
 	
 		
-		
-		function reestablecerPrecios() {
+		function reestablecerPrecios(){
+			
+		console.log('entró en reestablecerPrecios');
+			
 		// Selecciona todos los elementos con la clase "clase-servicio-da-card"
 		const elementosServicio = document.querySelectorAll('.clase-servicio-da-card');
 	
@@ -184,7 +267,21 @@
 			
 				// Buscar precio en LOCAL STORAGE
 				const precioServicio = encontrarPrecioPorCodigo(codServicioMedico);
-				elemento.textContent = precioServicio;
+				//elemento.textContent = 'buscando precio';
+				 elemento.textContent = precioServicio;
+				
+				/*
+				if (CityIdSelex == '0002')
+				{	
+					elemento.style.color = 'red';
+				}
+				
+				if (CityIdSelex == '001')
+				{	
+					elemento.style.color = 'blue';
+				}
+				*/
+				
 				
 			});
 		} else {

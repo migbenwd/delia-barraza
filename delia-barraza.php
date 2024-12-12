@@ -113,14 +113,14 @@ function get_servicios_por_ciudad($cityId){
 		$fecha_hora = date('Y-m-d H:i:s');
 
 			
-			if($contar == 7 ){
+			if($contar == 20 ){
 				break;
 			}
 			
 
 	// *********************** CONDICIONAL PRECIOS MAYORES A CERO	
 		
-			if( $estudio['price'] > '0.00' ){
+			if( $estudio['price'] != '0.00' ){
 
 			$result[$index]['code'] = $estudio['code'];
 			$result[$index]['studie'] = $estudio['studie'];
@@ -149,11 +149,10 @@ function get_servicios_por_ciudad($cityId){
 			return ($codigoA < $codigoB) ? -1 : 1; // Orden ascendente
 		}
 		}
-		
-		
 
 		// Ordenar el arreglo 'result' usando la función de comparación
 		usort($data['result'], 'compararEstudios');
+
 		$data_api = json_encode($data);
 		
 		echo $data_api;
@@ -182,7 +181,7 @@ function enqueue_ajax_script() {
         $plugin_url . 'js/script.js',  // Ubicación del archivo
         ['jquery'],  // Dependencias
         '1.0',  // Versión
-        true  // Cargar en el footer
+        false  // Cargar en el footer
     );
 	
 	
@@ -271,13 +270,13 @@ function get_all_products(){
 		foreach ($estudios as $estudio) {
 
 
-		if($contar == 7 ){
+		if($contar == 20 ){
 			break;
 		}
 		
 			// *********************** CONDICIONAL PRECIOS MAYORES A CERO	
 		
-			if( $estudio['price'] > '0.00' ){
+			if( $estudio['price'] != '0.00' ){
 
 				$result[$index]['code'] = $estudio['code'];
 				$result[$index]['studie'] = $estudio['studie'];
@@ -431,8 +430,6 @@ echo '<div id="modal-ciudades" class="modal">
 						<div class="row modal-ciudades"> 
 							<div class="col-md-2" data-ciudad-id="0002" style="cursor: pointer;">Tijuana</div>
 							<div class="col-md-2" data-ciudad-id="001" style="cursor: pointer;">Sinaloa</div>
-							<div class="col-md-2" data-ciudad-id="3" style="cursor: pointer;">Otra Ciudad</div>
-							<div class="col-md-2" data-ciudad-id="4" style="cursor: pointer;">Otra Ciudad</div>
 						</div>
 					</div>
 				</div>
@@ -502,7 +499,8 @@ echo '<div id="modal-ciudades" class="modal">
 					transform: translateY(-100%);
 				}
 			}
-		</style>';
+		</style>
+		';
 	
 		die();	
 }
@@ -514,3 +512,5 @@ function estilos_modal_ciudades() {
  	wp_enqueue_script('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js', array('jquery'), '5.3.0', true);	
 }
 add_action('wp_enqueue_scripts', 'estilos_modal_ciudades');
+
+
