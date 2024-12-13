@@ -512,5 +512,3 @@ function estilos_modal_ciudades() {
  	wp_enqueue_script('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js', array('jquery'), '5.3.0', true);	
 }
 add_action('wp_enqueue_scripts', 'estilos_modal_ciudades');
-
-
