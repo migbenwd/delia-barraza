@@ -181,7 +181,8 @@
 		const inicio = new Date();
 		console.log('Inicio de la consulta - getServicios', inicio.toLocaleString());
 		
-		// activarAnimacion();	
+		// activarAnimacion;	
+		activarAnimacionPrecios(true);
 		
 		$.ajax({
 			url: ajaxParams.ajaxUrl,  // El URL de WordPress, usualmente 'wp-admin/admin-ajax.php'
@@ -213,6 +214,10 @@
 			
 			// Reestablece Precios JUSTAMENTE AL GINALIZAR EL LLENADO DEL ARRAY servicios_city
 			reestablecerPrecios();	
+			
+			// desactivarAnimacion;	
+			activarAnimacionPrecios(false);
+		
 				
 			},
 			error: function(error) {
@@ -369,6 +374,99 @@
 			console.log('click en filtros jet smart');
 			reestablecerPrecios();
 		});
+		
+		
+		
+		// ----- ANIMACION DIV TITILANDO
+		// 
+		
+	
+		function activarAnimacionPrecios(activador) {
+	  // Verificar si el div ya existe para evitar duplicados
+	  const existingDiv = document.querySelector('.blinking');
+	  const existingOverlay = document.querySelector('.overlay');
+	  const existingStyle = document.querySelector('#blinking-style');
+	
+	  if (activador) {
+		if (!existingOverlay) {
+		  // Crear un overlay para bloquear la pantalla
+		  const overlay = document.createElement('div');
+		  overlay.classList.add('overlay');
+		  document.body.appendChild(overlay);
+		}
+	
+		if (!existingDiv) {
+		  // Crear un nuevo elemento div
+		  const div = document.createElement('div');
+	
+		  // Agregar una clase para estilos (opcional, pero recomendado)
+		  div.classList.add('blinking');
+	
+		  // Agregar texto al div (opcional)
+		  div.textContent = 'Reestableciendo Precios - ¡Espere unos segundos, por favor!';
+	
+		  // Agregar el div al cuerpo del documento
+		  document.body.appendChild(div);
+		}
+	
+		if (!existingStyle) {
+		  // Estilos CSS para la animación y el overlay
+		  const style = document.createElement('style');
+		  style.id = 'blinking-style'; // Agregar un id para identificar el estilo
+		  style.textContent = `
+			.overlay {
+			  position: fixed;
+			  top: 0;
+			  left: 0;
+			  width: 100%;
+			  height: 100%;
+			  background-color: rgba(0, 0, 0, 0.5);
+			  z-index: 9998;
+			}
+	
+			.blinking {
+			  position: fixed;
+			  top: 50%;
+			  left: 50%;
+			  transform: translate(-50%, -50%);
+			  background-color: #fff;
+			  padding: 20px;
+			  animation: blink 1s infinite;
+			  z-index: 9999;
+			}
+	
+			@keyframes blink {
+			  0% {
+				opacity: 1;
+			  }
+			  50% {
+				opacity: 0;
+			  }
+			  100% {
+				opacity: 1;
+			  }
+			}
+		  `;
+		  document.head.appendChild(style);
+		}
+	  } else {
+		// Eliminar el div y el overlay si existen
+		if (existingDiv) {
+		  existingDiv.remove();
+		}
+	
+		if (existingOverlay) {
+		  existingOverlay.remove();
+		}
+	
+		// Eliminar los estilos si existen
+		if (existingStyle) {
+		  existingStyle.remove();
+		}
+	  }
+	}
+	
+		
 		
 			
 			
