@@ -36,9 +36,6 @@ function wpgrp_menu_cb(){
 
 
 
-
-
-
 function get_servicios_por_ciudad($cityId){
 	
 	if (isset($_POST['cityId'])) {
@@ -120,7 +117,9 @@ function get_servicios_por_ciudad($cityId){
 
 	// *********************** CONDICIONAL PRECIOS MAYORES A CERO	
 		
-			if( $estudio['price'] != '0.00' ){
+		
+		if($estudio['enabled'] == 'Si' && $estudio['price'] != '0.00'){
+				
 
 			$result[$index]['code'] = $estudio['code'];
 			$result[$index]['studie'] = $estudio['studie'];
@@ -276,7 +275,7 @@ function get_all_products(){
 		
 			// *********************** CONDICIONAL PRECIOS MAYORES A CERO	
 		
-			if( $estudio['price'] != '0.00' ){
+			if( $estudio['enabled'] == 'Si' && $estudio['price'] != '0.00'){
 
 				$result[$index]['code'] = $estudio['code'];
 				$result[$index]['studie'] = $estudio['studie'];
@@ -356,12 +355,13 @@ function get_all_products(){
 				$post_args = array(
 					'ID'           => $post_id,
 					// Aquí agregarías los campos a actualizar, por ejemplo:
-					'post_title'   => 'Update ' . $estudio['studie'],
+					'post_title'   => $estudio['studie'],
 					'post_content' => $estudio['indications'],
 				);
 				
 				wp_update_post($post_args);
-        		update_post_meta($post_id, 'precio_oferta', $estudio['price']);
+        		// update_post_meta($post_id, 'precio_servicio', $estudio['price']);
+        		update_post_meta($post_id, 'precio_servicio', '0.00');
 
 			
 			} else {
@@ -374,7 +374,7 @@ function get_all_products(){
 	
 				$nueva_publicacion = array(
 					
-					'post_title'   => 'Insert ' . $estudio['studie'],
+					'post_title'   => $estudio['studie'],
 					'post_content' => $estudio['indications'],
 					'post_status'   => 'publish',
 					'post_type'     => 'servicios',
@@ -383,7 +383,10 @@ function get_all_products(){
 				$post_id = wp_insert_post($nueva_publicacion);
 			   
 				update_post_meta($post_id, 'cod_servicio_deliabarraza', $estudio['code']);
-        		update_post_meta($post_id, 'precio_oferta', $estudio['price']);
+        		// update_post_meta($post_id, 'precio_servicio', $estudio['price']);
+        		update_post_meta($post_id, 'precio_servicio', '0.00');
+
+
 					
 				// -------------------------------------------------------------------------------
 			}
@@ -411,9 +414,16 @@ add_action('admin_post_nopriv_get_all_products','get_all_products');
 
 function mostrar_cod_servicio() {
 	$cod_servicio = get_post_meta( get_the_ID(), 'cod_servicio_deliabarraza', true );
-	return "<p class='clase-servicio-da-card jet-listing-dynamic-field__content' post_id_servicio_medico=". get_the_ID() ." cod_servicio_medico=". $cod_servicio ." style='font-weight: 800; font-size:     23px;'>0.00</p>";
+	return "<p class='clase-servicio-da-card jet-listing-dynamic-field__content' post_id_servicio_medico=". get_the_ID() ." cod_servicio_medico=". $cod_servicio ." style='font-weight: 800; font-size:23px; margin-left:-5px;'>0.00</p>";
 }
 add_shortcode( 'cod_servicio_medico_deliabarraza', 'mostrar_cod_servicio' );
+
+
+function mostrar_precio_servicio_en_post() {
+	$cod_servicio = get_post_meta( get_the_ID(), 'cod_servicio_deliabarraza', true );
+	return "<p class='costo-servicio-en-post clase-servicio-da-card' post_id_servicio_medico=". get_the_ID() ." cod_servicio_medico=". $cod_servicio .">0.00</p>";
+}
+add_shortcode( 'cod_servicio_medico_deliabarraza_en_post', 'mostrar_precio_servicio_en_post' );
 
 
 // ----------------------------------- MODAL CIUDADES ------------------------------------------------------------------------//
@@ -421,22 +431,26 @@ add_shortcode( 'cod_servicio_medico_deliabarraza', 'mostrar_cod_servicio' );
 
 function mostrar_modal_de_ciudades() {
 
+	/*
 echo '<div id="modal-ciudades" class="modal">
 				<div class="modal-content">
-					<h2>Selecciona tu ciudad</h2>
+				
+				<img src="' . WPDELIABAR_URL . '/imagenes/logo_delia_modal.png" alt="Girl in a jacket" width="50" height="50">
+					<h2>Selecciona Tu Región</h2>
 					<p>Conoce los precios y servicios que existen en donde vives</p>
 					<br>
 					<div class="container"> 
 						<div class="row modal-ciudades"> 
-							<div class="col-md-2" data-ciudad-id="0002" style="cursor: pointer;">Tijuana</div>
 							<div class="col-md-2" data-ciudad-id="001" style="cursor: pointer;">Sinaloa</div>
+							<div class="col-md-2" data-ciudad-id="0002" style="cursor: pointer;">Tijuana</div>
 						</div>
 					</div>
 				</div>
 			</div>
 			<style>
 			.modal-ciudades div:hover {
-			  background-color: fuchsia;
+			  background-color: #E61794;
+			  color:white;
 			}
 			
 			.modal {
@@ -456,9 +470,33 @@ echo '<div id="modal-ciudades" class="modal">
 			margin: 15% auto;
 			padding: 2%;
 			border: 1px solid #888;
-			width: 50%;
+			width: 35%;
 			text-align: center;
+			border-radius: 20px;
 			}
+
+			.modal-content h2 {
+			font-weight:600;
+			font-size:22px;
+			}
+
+			.modal-content p {
+			font-weight:400;
+			font-size:18px;
+			}
+
+
+
+			.modal-content img {
+			margin: 0 auto;
+			display: block;
+			width: 36%;
+			padding-top:2%;
+			margin-bottom: 5%;				
+			
+			}
+			
+			
 
 			.modal-ciudades div {
 			
@@ -468,6 +506,8 @@ echo '<div id="modal-ciudades" class="modal">
 			margin: 10px 2px 13px 23px;
 			width: 45%;
 			border-radius: 11px;
+			font-size: 16px;
+    		font-weight: 500;
 
 			}
 			.modal.show {
@@ -499,8 +539,179 @@ echo '<div id="modal-ciudades" class="modal">
 					transform: translateY(-100%);
 				}
 			}
+			
+			
+			@media (max-width: 667px) {
+			
+				.modal-content {
+					width: 90%;
+					top:20%;
+				}
+
+				.modal-content img {
+					width: 55%;
+				}
+
+				.modal-ciudades div {
+					width: 40%;
+				}
+				
+				.modal-content h2 {
+					font-size: 1.85rem;
+				}
+
+
+			}
+			
 		</style>
 		';
+		*/
+	
+	
+	echo '
+	<div id="modal-ciudades" class="modal">
+    <div class="modal-content">
+        <span modal-ciudad-close-boton="1" class="close-button">&times;</span>
+        <img src="' . WPDELIABAR_URL . '/imagenes/logo_delia_modal.png" alt="Girl in a jacket" width="50" height="50">
+        <h2>Selecciona Tu Región</h2>
+        <p>Conoce los precios y servicios que existen en donde vives</p>
+        <br>
+        <div class="container">
+            <div class="row modal-ciudades">
+                <div class="col-md-2" data-ciudad-id="001" style="cursor: pointer;">Sinaloa</div>
+                <div class="col-md-2" data-ciudad-id="0002" style="cursor: pointer;">Tijuana</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.modal-ciudades div:hover {
+  background-color: #E61794;
+  color: white;
+  border: none;
+}
+
+.modal {
+  display: block;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 2%;
+  border: 1px solid #888;
+  width: 35%;
+  text-align: center;
+  border-radius: 20px;
+  position: relative;
+}
+
+.modal-content h2 {
+  font-weight: 600;
+  font-size: 22px;
+}
+
+.modal-content p {
+  font-weight: 400;
+  font-size: 18px;
+}
+
+.modal-content img {
+  margin: 0 auto;
+  display: block;
+  width: 36%;
+  padding-top: 2%;
+  margin-bottom: 5%;
+}
+
+.modal-ciudades div {
+  background: white;
+  border: 4px solid black;
+  padding: 2%;
+  margin: 10px 2px 13px 23px;
+  width: 45%;
+  border-radius: 11px;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+
+.close-button {
+    position: absolute;
+    top: 0px;
+    right: 50px;
+    font-size: 70px;
+    /* font-weight: bold; */
+    color: black;
+    cursor: pointer;
+}
+
+.close-button:hover {
+  color: black;
+}
+
+.modal.show {
+  animation: fadeInFromBottom 0.1s ease-in-out;
+}
+
+@keyframes fadeInFromBottom {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal.ocultar {
+  animation: fadeOutFromTop 0.1s ease-in-out;
+}
+
+@keyframes fadeOutFromTop {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+
+@media (max-width: 667px) {
+  .modal-content {
+    width: 90%;
+    top: 20%;
+  }
+
+  .modal-content img {
+    width: 55%;
+  }
+
+  .modal-ciudades div {
+    width: 40%;
+  }
+
+  .modal-content h2 {
+    font-size: 1.85rem;
+  }
+}
+</style>
+
+
+
+	';
 	
 		die();	
 }

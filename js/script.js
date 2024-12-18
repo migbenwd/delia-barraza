@@ -2,12 +2,32 @@
 	
 	$(document).ready(function(){
 		
+		carpetaServicio = false;
+		PredeterminadoApi = false;
 		
-		// Llamamos a la función para verificar
-		existeCiudadSeleccionada();
-		comprobarCarpeta();
+		var spanCiudad = document.getElementById("ciudad-seleccionada-spam");
+		// Deshabilitar el elemento para que no se pueda hacer clic
+  		spanCiudad.style.pointerEvents = "none";
+
+		const ciudadPredeterminada = localStorage.getItem('city_selected_id');
 		
+		if (ciudadPredeterminada === null || ciudadPredeterminada === '') {
+			console.log('No existe ciudad predeterminada en el localStorage.');
+			predeterminarPrecios();
+			//return false;
+		  }
+		  else
+		{
+		 	
+			const ciudadSpan1 = document.getElementById('ciudad-seleccionada-spam');
+			const ciudadSeleccionadaTexto = localStorage.getItem('city_selected_name');
+			ciudadSpan1.textContent = ciudadSeleccionadaTexto;  
+
+		}			  
+
 		 var CityIdSelex = 0;
+		
+		// Funcion Para llamar al modal (se debe CONDICIONAR)
 		
 		const ciudadSeleccionada = document.getElementById('ciudad-seleccionada-spam');
 		ciudadSeleccionada.addEventListener('click', () => {
@@ -17,6 +37,26 @@
 		});
 		
 		
+		
+		// ----------------------------------------------------------------------------//
+
+		
+		comprobarCarpeta();
+		
+		
+		function predeterminarPrecios(){
+			
+			console.log('Entró en función predeterminarPrecios');
+			localStorage.setItem('city_selected_id','001');
+			localStorage.setItem('city_selected_name', 'Sinaloa');
+		  	const ciudadSpan1 = document.getElementById('ciudad-seleccionada-spam');
+			ciudadSpan1.textContent = 'Sinaloa';
+			PredeterminadoApi = true;
+			get_servicios_por_ciudad('001');
+		
+		}
+		
+		/*
 		function existeCiudadSeleccionada() {
 		  // Obtenemos el valor del localStorage con la clave "city_selected_id"
 		  const ciudadSeleccionada = localStorage.getItem('city_selected_id');
@@ -29,7 +69,7 @@
 			console.log('No existe una ciudad seleccionada en el localStorage.');
 			
 			 // Mostramos el MODAL - POP UP  
-			 MostrarModal();
+			 // MostrarModal();
 			 
 			
 			return false;
@@ -47,31 +87,33 @@
 			return true;
 		  }
 		}
+		*/
 		
 		function comprobarCarpeta(){
-	
+
+			console.log("Entró en... comprobarCarpeta");
+
 			const urlActual = window.location.href;
 			const contieneServicio = urlActual.includes('servicio');
 	
 			if (contieneServicio) {
 				console.log("El dominio contiene la carpeta 'servicio'");
-				// Si existe city_selected_id en LOCAL ESTORAGE...pues... reestablecer precio
 				reestablecerPrecios();
+				 spanCiudad.style.pointerEvents = "auto";
 			} else {
 				console.log("El dominio NO contiene la carpeta 'servicio'");
+				 spanCiudad.style.pointerEvents = "none";
+
 			}		
 		}
+		
+		
 		
 	
 		// ------------------------------------------------------------------------------------------------------------------//
 		
 		
 		function MostrarModal(){
-		/*	
-		localStorage.removeItem('city_selected_id');		
-		localStorage.removeItem('city_selected_name');		
-		localStorage.removeItem('servicios_city');
-		*/
 			
 		$.ajax({
 			url: ajaxParams.ajaxUrl,  // El URL de WordPress, usualmente 'wp-admin/admin-ajax.php'
@@ -98,19 +140,27 @@
 		// 
 		
 		function colocarEventClicksEnModal(){
-	
-			const modalCiudadesXX = document.querySelectorAll('.modal-ciudades');
-			  const cantidadModales = modalCiudadesXX.length;
-			  // Mostramos el resultado en la consola (puedes modificarlo para mostrar el resultado donde quieras)
-			  console.log('Hay', cantidadModales, 'modales de ciudades en la página.');
+	        
 			
-			 const modalCiudades = document.getElementById('modal-ciudades');
-	
-			// Agregamos un event listener para detectar clics dentro del div
-			
+			const modalCiudades = document.getElementById('modal-ciudades');
+
 			modalCiudades.addEventListener('click', (event) => {
+			
+			if (event.target.hasAttribute('modal-ciudad-close-boton')) {
+
+					console.log('click en X de cerrar MODAL');
+
+
+				// const modal = document.getElementById("modal-ciudades");
 				
-			  // Verificamos si el elemento en el que se hizo clic tiene el atributo data-ciudad-id
+				modalCiudades.classList.remove('show'); // Ocultar el modal
+				modalCiudades.style.display = 'none';
+				modalCiudades.remove();
+				console.log("Elemento 'modal-ciudades' eliminado correctamente.");  				
+				
+
+			}	
+				// Verificamos si el elemento en el que se hizo clic tiene el atributo data-ciudad-id
 			  
 			  if (event.target.hasAttribute('data-ciudad-id')) {
 				  
@@ -139,13 +189,13 @@
 				
 				const modal = document.getElementById("modal-ciudades");
 				modal.classList.remove('show'); // Ocultar el modal
-				modal.style.transition = 'transform 0.5s ease-in-out';
+				modal.style.transition = 'transform 0.1s ease-in-out';
 				modal.style.transform = 'translateY(-100%)';
 				
 				
 				setTimeout(() => {
 					  modal.style.display = 'none';
-				  }, 800); // 5000 milisegundos = 5 segundos
+				  }, 200); // 5000 milisegundos = 5 segundos
 				
 				modal.remove();
 				 console.log("Elemento 'modal-ciudades' eliminado correctamente.");  
@@ -155,7 +205,6 @@
 				  
 				get_servicios_por_ciudad(CiudadSelectId);
 				
-				//reestablecerPrecios(); --- aqui no funciona  
 	
 			  }
 				
@@ -180,9 +229,17 @@
 		// Marca el inicio de la consulta
 		const inicio = new Date();
 		console.log('Inicio de la consulta - getServicios', inicio.toLocaleString());
-		
-		// activarAnimacion;	
-		activarAnimacionPrecios(true);
+
+		if ( PredeterminadoApi === true)
+		{
+		   activarAnimacionPrecios(false);
+		}
+		else	
+		{
+		   activarAnimacionPrecios(true);
+		}
+			
+			
 		
 		$.ajax({
 			url: ajaxParams.ajaxUrl,  // El URL de WordPress, usualmente 'wp-admin/admin-ajax.php'
@@ -204,8 +261,7 @@
 			localStorage.setItem('servicios_city', JSON.stringify(dataServicio.result));
 			console.log('Datos guardados en local storage');			
 			
-			// desactivarAnimacion();	
-				
+			
 			const fin = new Date();
 			console.log('Fin de la consulta:', fin.toLocaleString());
 	
@@ -215,7 +271,7 @@
 			// Reestablece Precios JUSTAMENTE AL GINALIZAR EL LLENADO DEL ARRAY servicios_city
 			reestablecerPrecios();	
 			
-			// desactivarAnimacion;	
+			// desactivarAnimacion;	 --- OJO AQUI -------------- SE DEBE DESCOMENTAR SIEMPRE
 			activarAnimacionPrecios(false);
 		
 				
@@ -229,9 +285,7 @@
 		
 		}
 		
-		
-		var costoServicio = 0;
-		
+				
 		function encontrarPrecioPorCodigo(codigo) {
 			
 		  // Obtener el array de servicios desde el localStorage
@@ -248,7 +302,7 @@
 					  // Si se encontró el servicio, retornar el precio, si no, retornar un mensaje o valor por defecto
 					
 				  
-					return servicioEncontrado ? servicioEncontrado.price : 'Servicio Sin Precio En esta Ciudad';	  
+					return servicioEncontrado ? servicioEncontrado.price : 0;	  
 	
 			  }
 				
@@ -263,7 +317,11 @@
 			
 		// Selecciona todos los elementos con la clase "clase-servicio-da-card"
 		const elementosServicio = document.querySelectorAll('.clase-servicio-da-card');
+		console.log('cnatidad de DIVS en reestablecerPrecios');
+		console.log(elementosServicio.length);
 	
+			
+			
 		// Verifica si se encontraron elementos
 		if (elementosServicio.length > 0) {
 			// Si hay elementos, recorre cada uno y muestra el valor del atributo
@@ -272,27 +330,32 @@
 			
 				// Buscar precio en LOCAL STORAGE
 				const precioServicio = encontrarPrecioPorCodigo(codServicioMedico);
-				//elemento.textContent = 'buscando precio';
-				 elemento.textContent = precioServicio;
+
+				// console.log('codServicioMedico', codServicioMedico);
+				// console.log('precioServicio', precioServicio);
+
 				
-				/*
-				if (CityIdSelex == '0002')
+				if (precioServicio != 0)
 				{	
-					elemento.style.color = 'red';
+					elemento.textContent = precioServicio;
+				}	
+				else
+				{	
+					
+					elemento.textContent = "sinprec";
 				}
 				
-				if (CityIdSelex == '001')
-				{	
-					elemento.style.color = 'blue';
-				}
-				*/
+
 				
 				
 			});
-		} else {
+			} else {
 			// Si no hay elementos, muestra un mensaje en la consola
 			// console.log('No se encontraron elementos con la clase "clase-servicio-da-card".');
-		}
+			}
+						
+			
+			
 		}		
 		
 		
@@ -382,10 +445,29 @@
 		
 	
 		function activarAnimacionPrecios(activador) {
-	  // Verificar si el div ya existe para evitar duplicados
+			
+			console.log('entró en ANIMACION');
+	   	 	
+		
 	  const existingDiv = document.querySelector('.blinking');
 	  const existingOverlay = document.querySelector('.overlay');
 	  const existingStyle = document.querySelector('#blinking-style');
+
+		// Ruta relativa de la imagen
+		const rutaRelativa = "/wp-content/plugins/delia-barraza/imagenes/logo_delia_modal.png";
+
+		// Obtener la URL base del sitio
+		const baseUrl = new URL(window.location.href);
+		console.log('baseUrl host'); 
+		console.log(baseUrl); 
+
+		// Concatenar la URL base con la ruta relativa
+		const urlCompleta = new URL(rutaRelativa, baseUrl).href;
+			
+		const urlLogoDelia = baseUrl.origin + rutaRelativa;
+			
+		// console.log(urlCompleta); // Output: https://tudominio.com/wp-content/plugins/delia-barraza//imagenes/logo_delia_modal.png			
+		console.log(urlLogoDelia); // Output: https://tudominio.com/wp-content/plugins/delia-barraza//imagenes/logo_delia_modal.png			
 	
 	  if (activador) {
 		if (!existingOverlay) {
@@ -401,10 +483,30 @@
 	
 		  // Agregar una clase para estilos (opcional, pero recomendado)
 		  div.classList.add('blinking');
+			
+		// Crear un elemento img para el GIF loader
+			const loadergifprecios = document.createElement('img');
+			loadergifprecios.src = 'https://i.gifer.com/ZKZg.gif'; // Reemplazar con la ruta del GIF
+			loadergifprecios.alt = 'Cargando...';
+			loadergifprecios.classList.add('loadergifprecios');			
+
+			// Crear un elemento img para el LOGO DEL loader
+			const logoloader = document.createElement('img');
+			logoloader.src = urlLogoDelia; // Reemplazar con la ruta del GIF
+			logoloader.classList.add('logoloader');			
+		
+
+			// Crear un elemento span para el texto
+    		const text = document.createElement('p');
+    		text.textContent = 'Localizando Precios De Su Región';
+
+    // Agregar el GIF y el texto al div
+    div.appendChild(loadergifprecios);
+    div.appendChild(logoloader);			
+    div.appendChild(text);			
 	
-		  // Agregar texto al div (opcional)
-		  div.textContent = 'Reestableciendo Precios - ¡Espere unos segundos, por favor!';
-	
+			
+			
 		  // Agregar el div al cuerpo del documento
 		  document.body.appendChild(div);
 		}
@@ -421,19 +523,44 @@
 			  width: 100%;
 			  height: 100%;
 			  background-color: rgba(0, 0, 0, 0.5);
-			  z-index: 9998;
-			}
-	
-			.blinking {
-			  position: fixed;
-			  top: 50%;
-			  left: 50%;
-			  transform: translate(-50%, -50%);
-			  background-color: #fff;
-			  padding: 20px;
-			  animation: blink 1s infinite;
 			  z-index: 9999;
 			}
+	
+
+			.blinking {
+				position: fixed;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				background-color: #fff;
+				padding: 20px;
+				z-index: 9999;
+				text-align: center;
+				border-radius: 22px;
+			}
+
+
+			.blinking img {
+			}
+
+			.blinking p {
+				margin-top: 4%;
+				font-size: 22px;
+				font-weight: 600;
+			}
+
+
+
+			img.loadergifprecios {
+			width: 10%;
+
+			}
+
+			img.logoloader {
+			width: 25%;
+
+			}
+
 	
 			@keyframes blink {
 			  0% {
@@ -447,7 +574,12 @@
 			  }
 			}
 		  `;
+		  
 		  document.head.appendChild(style);
+			
+			
+			
+			
 		}
 	  } else {
 		// Eliminar el div y el overlay si existen
@@ -468,7 +600,32 @@
 	
 		
 		
+// Detecta cuando inicia el evento
+    $(document).on('ajaxSend', function(event, jqXHR, ajaxOptions) {
+        if (ajaxOptions.data && ajaxOptions.data.includes('action=jet_engine_ajax')) {
+            let params = new URLSearchParams(ajaxOptions.data);
+            let handler = params.get('handler');
+
+            if (handler === 'listing_load_more') {
+                // console.log('Inicio del handler: listing_load_more en jet_engine_ajax');
+            }
+        }
+    });
+
+    // Detecta cuando el evento ha finalizado
+    $(document).on('ajaxComplete', function(event, jqXHR, ajaxOptions) {
+        if (ajaxOptions.data && ajaxOptions.data.includes('action=jet_engine_ajax')) {
+            let params = new URLSearchParams(ajaxOptions.data);
+            let handler = params.get('handler');
+
+            if (handler === 'listing_load_more') {
+                //console.log('Finalizó el handler: listing_load_more en jet_engine_ajax');
+				reestablecerPrecios();
+            }
+        }
+    });
 			
+		
 			
 	});
 	})(jQuery);
